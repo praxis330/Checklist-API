@@ -20,6 +20,7 @@ tasks = [
 	}
 ]
 
+
 @app.route('/api/checklist/tasks', methods=['GET'])
 @auth.login_required
 def get_tasks():
