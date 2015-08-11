@@ -3,8 +3,7 @@ from flask.ext.httpauth import HTTPBasicAuth
 import os
 
 auth = HTTPBasicAuth()
-app = Flask(__name__)
-USERNAME = os.environ.get('FUSER')
+USERNAME = os.environ.get('USER')
 PASSWORD = os.environ.get('PASSWORD')
 
 tasks = [
@@ -20,6 +19,9 @@ tasks = [
 	}
 ]
 
+#--------#
+# ROUTES #
+#--------#
 
 @app.route('/api/checklist/tasks', methods=['GET'])
 @auth.login_required
@@ -64,6 +66,10 @@ def delete_task(task_id):
 	tasks.remove(task[0])
 	return jsonify({'result': True}), 200
 
+#------------------#
+# HELPER FUNCTIONS #
+#------------------#
+
 def is_valid(request):
 	flag = True
 	if not request.json:
@@ -89,6 +95,10 @@ def get_password(username):
 		return PASSWORD
 	return None
 
+#----------------#
+# ERROR HANDLING #
+#----------------#
+
 @app.errorhandler(404)
 def not_found(error):
 	return make_response(jsonify({'error': 'Not found'}), 404)
@@ -100,6 +110,3 @@ def bad_request(error):
 @auth.error_handler
 def unauthorised():
 	return make_response(jsonify({'error': 'Not authorised'}), 403)
-
-if __name__ == "__main__":
-	app.run(debug=True)
