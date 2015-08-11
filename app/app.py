@@ -1,10 +1,11 @@
 from flask import Flask, jsonify, abort, make_response, request, url_for
 from flask.ext.httpauth import HTTPBasicAuth
 import os
+import config
 
 auth = HTTPBasicAuth()
-USERNAME = os.environ.get('USER')
-PASSWORD = os.environ.get('PASSWORD')
+app = Flask(__name__)
+app.config.from_object(os.environ['APP_SETTINGS'])
 
 tasks = [
 	{
