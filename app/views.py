@@ -53,8 +53,9 @@ def create_task():
 		'name': request.json['name'],
 		'done': request.json.get('done', False)
 	}
-	created = create(task)
+	created, id_num = create(task)
 	if created:
+		task['id']= id_num
 		return jsonify({'task': task}), 201
 	else:
 		abort(500)
@@ -76,9 +77,10 @@ def create(task):
 	id_num = int(redis_db.get("tasks:counter")) + 1
 	redis_db.hmset("tasks:%d" % id_num, task)
 	redis_db.incr("tasks:counter")
+	redis_db.bgsave()
 	if redis_db.exists("tasks:%d" % id_num):
-		return True
-	return False
+		return (True, id_num)
+	return (False, None)
 
 def get(task_id):
 	task = redis_db.hgetall("tasks:%d" % task_id)
