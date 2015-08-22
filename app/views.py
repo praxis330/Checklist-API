@@ -43,10 +43,10 @@ def update_task(task_id):
 
 	print >>sys.stderr, task
 	for key in task:
-		print >>sys.stderr, request.json[field]
-		if field in request.json:
-			task[field] = request.json[field]
-			print >>sys.stderr, task[field]
+		print >>sys.stderr, request.json[key]
+		if key in request.json:
+			task[key] = request.json[key]
+			print >>sys.stderr, task[key]
 	update(task_id, task)
 	print >>sys.stderr, task
 	return jsonify({'task': task})
