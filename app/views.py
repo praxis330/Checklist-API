@@ -33,9 +33,8 @@ def get_task(task_id):
 def update_task(task_id):
 	if not is_valid(request):
 		abort(400)
-	# TODO: find a better way to return 404 if no object found.
-	# if len(old_task) == 0:
-	# 	abort(404)
+	if not get(task_id):
+		abort(404)
 
 	task = get(task_id)
 
