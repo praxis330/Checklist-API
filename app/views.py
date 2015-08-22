@@ -1,6 +1,7 @@
 from app import app, redis_db
 from flask.ext.httpauth import HTTPBasicAuth
 from flask import jsonify, abort, make_response, request, url_for
+import sys
 
 auth = HTTPBasicAuth()
 
@@ -31,6 +32,7 @@ def get_task(task_id):
 @auth.login_required
 def update_task(task_id):
 	old_task = list(get(task_id))
+	print >>sys.stderr, old_task
 	task = old_task[0]
 
 	if not is_valid(request):
@@ -54,8 +56,10 @@ def create_task():
 		'done': request.json.get('done', False)
 	}
 	created, id_num = create(task)
+	print >>sys.stderr, created
 	if created:
 		task['id']= id_num
+		print >>sys.stderr, task['id']
 		return jsonify({'task': task}), 201
 	else:
 		abort(500)
@@ -77,7 +81,6 @@ def create(task):
 	id_num = int(redis_db.get("tasks:counter")) + 1
 	redis_db.hmset("tasks:%d" % id_num, task)
 	redis_db.incr("tasks:counter")
-	redis_db.bgsave()
 	if redis_db.exists("tasks:%d" % id_num):
 		return (True, id_num)
 	return (False, None)
