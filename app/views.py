@@ -41,7 +41,8 @@ def update_task(task_id):
 	print >>sys.stderr, task
 	print >>sys.stderr, request.json
 
-	for field in list(task):
+	print >>sys.stderr, task
+	for key in task:
 		print >>sys.stderr, request.json[field]
 		if field in request.json:
 			task[field] = request.json[field]
