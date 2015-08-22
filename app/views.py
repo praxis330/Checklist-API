@@ -33,11 +33,12 @@ def get_task(task_id):
 def update_task(task_id):
 	if not is_valid(request):
 		abort(400)
-	if len(old_task) == 0:
-		abort(404)
+	# TODO: find a better way to return 404 if no object found.
+	# if len(old_task) == 0:
+	# 	abort(404)
 
-	old_task = task = get(task_id)
-	print >>sys.stderr, old_task
+	task = get(task_id)
+	print >>sys.stderr, task
 	print >>sys.stderr, request.json
 
 	for field in list(task):
