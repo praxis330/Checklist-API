@@ -40,9 +40,12 @@ def update_task(task_id):
 		abort(404)
 
 	for field in ['name', 'done']:
+		print sys.stderr, request.json[field]
 		if request.json[field]:
 			task[field] = request.json[field]
+			print sys.stderr, task[field]
 	update(task_id, task)
+	print sys.stderr, task
 	return jsonify({'task': task})
 
 @app.route('/api/checklist/tasks/', methods=['POST'])
