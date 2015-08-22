@@ -31,9 +31,8 @@ def get_task(task_id):
 @app.route('/api/checklist/tasks/<int:task_id>', methods=['PUT'])
 @auth.login_required
 def update_task(task_id):
-	old_task = list(get(task_id))
+	old_task = task = get(task_id)
 	print >>sys.stderr, old_task
-	task = old_task[0]
 
 	if not is_valid(request):
 		abort(400)
