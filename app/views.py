@@ -31,16 +31,16 @@ def get_task(task_id):
 @app.route('/api/checklist/tasks/<int:task_id>', methods=['PUT'])
 @auth.login_required
 def update_task(task_id):
-	old_task = task = get(task_id)
-	print >>sys.stderr, old_task
-	print >>sys.stderr, request.json
-
 	if not is_valid(request):
 		abort(400)
 	if len(old_task) == 0:
 		abort(404)
 
-	for field in ['name', 'done']:
+	old_task = task = get(task_id)
+	print >>sys.stderr, old_task
+	print >>sys.stderr, request.json
+
+	for field in list(task):
 		print >>sys.stderr, request.json[field]
 		if field in request.json:
 			task[field] = request.json[field]
