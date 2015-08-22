@@ -38,12 +38,8 @@ def update_task(task_id):
 	# 	abort(404)
 
 	task = get(task_id)
-	print >>sys.stderr, task
-	print >>sys.stderr, request.json
 
-	print >>sys.stderr, task
 	for key in task:
-		print >>sys.stderr, request.json[key]
 		if key in request.json:
 			task[key] = request.json[key]
 			print >>sys.stderr, task[key]
