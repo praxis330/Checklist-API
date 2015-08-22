@@ -33,6 +33,7 @@ def get_task(task_id):
 def update_task(task_id):
 	old_task = task = get(task_id)
 	print >>sys.stderr, old_task
+	print >>sys.stderr, request.json
 
 	if not is_valid(request):
 		abort(400)
