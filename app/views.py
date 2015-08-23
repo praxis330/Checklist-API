@@ -12,21 +12,21 @@ auth = HTTPBasicAuth()
 @app.route('/api/checklist/tasks', methods=['GET'])
 @auth.login_required
 def get_tasks():
-	tasks = []
+	tasks = {}
 	tasks_number = int(redis_db.get("tasks:counter"))
 	for i in range(tasks_number):
 		task = get(i + 1)
-		task['id'] = i + 1
-		tasks.append(task)
-	return jsonify({'tasks': tasks})
+		tasks[i + 1] = task
+	return jsonify(tasks)
 
 @app.route('/api/checklist/tasks/<int:task_id>', methods=['GET'])
 @auth.login_required
 def get_task(task_id):
-	task = list(get(task_id))
+	task = {}
+	task[task_id] = get(task_id)
 	if len(task) == 0:
 		abort(404)
-	return jsonify({'task': task[0]})
+	return jsonify(task)
 
 @app.route('/api/checklist/tasks/<int:task_id>', methods=['PUT'])
 @auth.login_required
@@ -44,7 +44,7 @@ def update_task(task_id):
 			print >>sys.stderr, task[key]
 	update(task_id, task)
 	print >>sys.stderr, task
-	return jsonify({'task': task})
+	return jsonify({task_id: task})
 
 @app.route('/api/checklist/tasks/', methods=['POST'])
 @auth.login_required
@@ -58,9 +58,8 @@ def create_task():
 	created, id_num = create(task)
 	print >>sys.stderr, created
 	if created:
-		task['id']= id_num
 		print >>sys.stderr, task['id']
-		return jsonify({'task': task}), 201
+		return jsonify({task_id: task}), 201
 	else:
 		abort(500)
 
@@ -87,7 +86,7 @@ def create(task):
 
 def get(task_id):
 	task = redis_db.hgetall("tasks:%d" % task_id)
-	return task
+	return parse_bool(task)
 
 def delete(task_id):
 	task_id = "tasks:%d" % task_id
@@ -100,6 +99,13 @@ def delete(task_id):
 
 def update(task_id, task):
 	redis_db.hmset("tasks:%d" % task_id, task)
+
+def parse_bool(task):
+	if task['done'] == 'True':
+		task['done'] = True
+	else:
+		task['done'] = False
+	return task
 
 #----------------#
 # ERROR HANDLING #
@@ -134,15 +140,6 @@ def is_valid(request):
 	if 'done' in request.json and type(request.json['done']) is not bool:
 		flag = False
 	return flag
-
-# def get_uri(task, endpoint):
-# 	new_task = {}
-# 	for field in task:
-# 		if field == 'id':
-# 			new_task['uri'] = url_for(endpoint, task_id=task['id'], _external=True)
-# 		else:
-# 			new_task[field] = task[field]
-# 	return new_task
 
 @auth.get_password
 def get_password(username):
