@@ -58,7 +58,6 @@ def create_task():
 	created, id_num = create(task)
 	print >>sys.stderr, created
 	if created:
-		print >>sys.stderr, task['id']
 		return jsonify({task_id: task}), 201
 	else:
 		abort(500)
