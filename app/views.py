@@ -13,10 +13,9 @@ auth = HTTPBasicAuth()
 @auth.login_required
 def get_tasks():
 	tasks = {}
-	tasks_number = int(redis_db.get("tasks:counter"))
-	for i in range(tasks_number):
-		task = get(i + 1)
-		tasks[i + 1] = task
+	for task_id in get_index("tasks:ids"):
+		task = get(int(task_id))
+		tasks[task_id] = task
 	return jsonify(tasks)
 
 @app.route('/api/checklist/tasks/<int:task_id>', methods=['GET'])
@@ -41,9 +40,7 @@ def update_task(task_id):
 	for key in task:
 		if key in request.json:
 			task[key] = request.json[key]
-			print >>sys.stderr, task[key]
 	update(task_id, task)
-	print >>sys.stderr, task
 	return jsonify({task_id: task})
 
 @app.route('/api/checklist/tasks/', methods=['POST'])
@@ -56,9 +53,9 @@ def create_task():
 		'done': request.json.get('done', False)
 	}
 	created, id_num = create(task)
-	print >>sys.stderr, created
 	if created:
-		return jsonify({task_id: task}), 201
+		index_add("tasks", id_num)
+		return jsonify({id_num: task}), 201
 	else:
 		abort(500)
 
@@ -78,8 +75,10 @@ def delete_task(task_id):
 def create(task):
 	id_num = int(redis_db.get("tasks:counter")) + 1
 	redis_db.hmset("tasks:%d" % id_num, task)
-	redis_db.incr("tasks:counter")
+	
 	if redis_db.exists("tasks:%d" % id_num):
+		redis_db.incr("tasks:counter")
+		index_add("tasks", id_num)
 		return (True, id_num)
 	return (False, None)
 
@@ -89,15 +88,24 @@ def get(task_id):
 
 def delete(task_id):
 	task_id = "tasks:%d" % task_id
-	task = redis_db.exists(task_id)
-	if task:
+	
+	if redis_db.exists(task_id):
 		redis_db.delete(task_id)
-		redis_db.decr("tasks:counter")
+		index_remove("tasks", task_id)
 		return True
 	return False
 
 def update(task_id, task):
 	redis_db.hmset("tasks:%d" % task_id, task)
+
+def get_index(name):
+	return redis_db.smembers(name)
+
+def index_add(name, task_id):
+	redis_db.sadd("%s:ids" % name, task_id)
+
+def index_remove(name, task_id):
+	redis_db.srem("%s:ids" % name, task_id)
 
 def parse_bool(task):
 	if task['done'] == 'True':
