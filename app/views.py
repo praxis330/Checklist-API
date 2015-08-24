@@ -76,7 +76,11 @@ def create(task):
 	id_num = int(redis_db.get("tasks:counter")) + 1
 	redis_db.hmset("tasks:%d" % id_num, task)
 	
+<<<<<<< Updated upstream
 	if redis_db.exists("tasks:%d" % id_num):
+=======
+	if task:
+>>>>>>> Stashed changes
 		redis_db.incr("tasks:counter")
 		index_add("tasks", id_num)
 		return (True, id_num)
@@ -86,12 +90,12 @@ def get(task_id):
 	task = redis_db.hgetall("tasks:%d" % task_id)
 	return parse_bool(task)
 
-def delete(task_id):
-	task_id = "tasks:%d" % task_id
+def delete(id_num):
+	task_id = "tasks:%d" % id_num
 	
 	if redis_db.exists(task_id):
 		redis_db.delete(task_id)
-		index_remove("tasks", task_id)
+		index_remove("tasks", id_num)
 		return True
 	return False
 
