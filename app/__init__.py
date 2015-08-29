@@ -13,7 +13,7 @@ app.config.from_object(os.environ['APP_SETTINGS'])
 url = urlparse.urlparse(app.config['REDIS_URL'])
 redis_db = redis.Redis(host=url.hostname, port=url.port, password=url.password)
 
-if not redis_db.exists("tasks:counter"):
-	redis_db.set("tasks:counter", 0)
+# if not redis_db.exists("tasks:counter"):
+# 	redis_db.set("tasks:counter", 0)
 
 from app import views
