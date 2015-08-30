@@ -144,7 +144,7 @@ class PostTest(AppTestCase):
     self.assertIn('test:3', response.data)
     self.assertIn('item 3', response.data)
 
-  def test_post_first_item(self):
+  def test_post_new_items(self):
     data = {'done': True, 'name': 'first item'}
     response = self.app.post('/api/checklist/new_list/',
       headers={
@@ -156,6 +156,18 @@ class PostTest(AppTestCase):
     self.assertEqual(response.status_code, 201)
     self.assertIn('new_list:1', response.data)
     self.assertIn('first item', response.data)
+    # second item
+    data = {'done': True, 'name': 'second item'}
+    response = self.app.post('/api/checklist/new_list/',
+      headers={
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic dGVzdDpwYXNz'
+      },
+      data=json.dumps(data)
+    )
+    self.assertEqual(response.status_code, 201)
+    self.assertIn('new_list:2', response.data)
+    self.assertIn('second item', response.data)
 
   def test_post_without_auth(self):
     data = {'done': True, 'name': 'item 3'}
