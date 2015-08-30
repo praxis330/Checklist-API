@@ -84,7 +84,7 @@ def create(name, task):
 	if counter:
 		id_num = int(redis_db.get("%s:counter" % name)) + 1
 	else:
-		redis_db.set("%s:counter" % name, 1)
+		redis_db.set("%s:counter" % name, 0)
 		id_num = 1
 	item_id = "%s:%d" % (name, id_num)
 	redis_db.hmset(item_id, task)
