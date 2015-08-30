@@ -9,60 +9,67 @@ auth = HTTPBasicAuth()
 # ROUTES #
 #--------#
 
-@app.route('/api/checklist/tasks', methods=['GET'])
+@app.route('/api/checklist/<name>', methods=['GET'])
 @auth.login_required
-def get_tasks():
+def get_tasks(name):
 	tasks = {}
-	for task_id in get_index("tasks:ids"):
-		task = get(int(task_id))
+	for task_id in get_index("%s:ids" % name):
+		task = get(task_id)
 		tasks[task_id] = task
 	return jsonify(tasks)
 
-@app.route('/api/checklist/tasks/<int:task_id>', methods=['GET'])
+@app.route('/api/checklist/<name>/<int:task_id>', methods=['GET'])
 @auth.login_required
-def get_task(task_id):
-	task = {}
-	task[task_id] = get(task_id)
-	if len(task) == 0:
+def get_task(name, task_id):
+	task_dict = {}
+	item_id = "%s:%d" % (name, task_id)
+	task = get(item_id)
+	if len(task) != 0:
+		task_dict[item_id] = task
+		return jsonify(task_dict)
+	else:
 		abort(404)
-	return jsonify(task)
 
-@app.route('/api/checklist/tasks/<int:task_id>', methods=['PUT'])
+@app.route('/api/checklist/<name>/<int:task_id>', methods=['PUT'])
 @auth.login_required
-def update_task(task_id):
+def update_task(name,task_id):
 	if not is_valid(request):
 		abort(400)
-	if not get(task_id):
+	
+	item_id = "%s:%d" % (name, task_id)
+	task = get(item_id)
+
+	if len(task) != 0:
+		for key in task:
+			if key in request.json:
+				task[key] = request.json[key]
+		update(item_id, task)
+		return jsonify({item_id: task})
+	else:
 		abort(404)
+		
 
-	task = get(task_id)
-
-	for key in task:
-		if key in request.json:
-			task[key] = request.json[key]
-	update(task_id, task)
-	return jsonify({task_id: task})
-
-@app.route('/api/checklist/tasks/', methods=['POST'])
+@app.route('/api/checklist/<name>/', methods=['POST'])
 @auth.login_required
-def create_task():
-	if not is_valid(request):
+def create_task(name):
+	if not is_valid(request) or 'name' not in request.json:
 		abort(400)
 	task = {
 		'name': request.json['name'],
 		'done': request.json.get('done', False)
 	}
-	created, id_num = create(task)
+	created, id_num = create(name, task)
 	if created:
 		index_add("tasks", id_num)
 		return jsonify({id_num: task}), 201
 	else:
 		abort(500)
 
-@app.route('/api/checklist/tasks/<int:task_id>', methods=['DELETE'])
+@app.route('/api/checklist/<name>/<int:task_id>', methods=['DELETE'])
 @auth.login_required
-def delete_task(task_id):
-	deleted = delete(task_id)
+def delete_task(name, task_id):
+	item_id = "%s:%d" % (name, task_id)
+	deleted = delete(name, item_id)
 	if deleted:
 		return jsonify({'result': True}), 200
 	else:
@@ -72,31 +79,38 @@ def delete_task(task_id):
 # DATABASE API #
 #--------------#
 
-def create(task):
-	id_num = int(redis_db.get("tasks:counter")) + 1
-	redis_db.hmset("tasks:%d" % id_num, task)
+def create(name, task):
+	counter = redis_db.get("%s:counter" % name)
+	if counter:
+		id_num = int(redis_db.get("%s:counter" % name)) + 1
+	else:
+		redis_db.set("%s:counter" % name, 1)
+		id_num = 1
+	item_id = "%s:%d" % (name, id_num)
+	redis_db.hmset(item_id, task)
 
-	if redis_db.exists("tasks:%d" % id_num):
-		redis_db.incr("tasks:counter")
-		index_add("tasks", id_num)
-		return (True, id_num)
+	if redis_db.exists(item_id):
+		redis_db.incr("%s:counter" % name)
+		index_add(name, item_id)
+		return (True, item_id)
 	return (False, None)
 
-def get(task_id):
-	task = redis_db.hgetall("tasks:%d" % task_id)
-	return parse_bool(task)
+def get(item_id):
+	task = redis_db.hgetall(item_id)
+	if 'done' in task:
+		return parse_bool(task)
+	else:
+		return task
 
-def delete(id_num):
-	task_id = "tasks:%d" % id_num
-	
-	if redis_db.exists(task_id):
-		redis_db.delete(task_id)
-		index_remove("tasks", id_num)
+def delete(name, item_id):	
+	if redis_db.exists(item_id):
+		redis_db.delete(item_id)
+		index_remove(name, item_id)
 		return True
 	return False
 
-def update(task_id, task):
-	redis_db.hmset("tasks:%d" % task_id, task)
+def update(item_id, task):
+	redis_db.hmset(item_id, task)
 
 def get_index(name):
 	return redis_db.smembers(name)
@@ -110,7 +124,7 @@ def index_remove(name, task_id):
 def parse_bool(task):
 	if task['done'] == 'True':
 		task['done'] = True
-	else:
+	elif task['done'] == 'False':
 		task['done'] = False
 	return task
 
