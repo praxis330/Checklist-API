@@ -62,10 +62,9 @@ def create_task(name):
 	else:
 		abort(500)
 
-@app.route('/api/checklist/<name>/<int:task_id>', methods=['DELETE'])
+@app.route('/api/checklist/<name>/<int:item_id>', methods=['DELETE'])
 @auth.login_required
-def delete_task(name, task_id):
-	item_id = "%s:%d" % (name, task_id)
+def delete_task(name, item_id):
 	deleted = delete(name, item_id)
 	if deleted:
 		return jsonify({'result': True}), 200
