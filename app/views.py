@@ -100,9 +100,10 @@ def get(name, item_id):
 	else:
 		return task
 
-def delete(name, item_id):	
-	if redis_db.exists(item_id):
-		redis_db.delete(item_id)
+def delete(name, item_id):
+	task_id = "%s:%d" % (name, item_id)	
+	if redis_db.exists(task_id):
+		redis_db.delete(task_id)
 		index_remove(name, item_id)
 		return True
 	return False
