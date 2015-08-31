@@ -13,37 +13,34 @@ auth = HTTPBasicAuth()
 @auth.login_required
 def get_tasks(name):
 	tasks = {}
-	for task_id in get_index("%s:ids" % name):
-		task = get(task_id)
-		tasks[task_id] = task
+	for item_id in get_index("%s:ids" % name):
+		task = get(name, int(item_id))
+		tasks[item_id] = task
 	return jsonify(tasks)
 
-@app.route('/api/checklist/<name>/<int:task_id>', methods=['GET'])
+@app.route('/api/checklist/<name>/<int:item_id>', methods=['GET'])
 @auth.login_required
-def get_task(name, task_id):
+def get_task(name, item_id):
 	task_dict = {}
-	item_id = "%s:%d" % (name, task_id)
-	task = get(item_id)
+	task = get(name, item_id)
 	if len(task) != 0:
 		task_dict[item_id] = task
 		return jsonify(task_dict)
 	else:
 		abort(404)
 
-@app.route('/api/checklist/<name>/<int:task_id>', methods=['PUT'])
+@app.route('/api/checklist/<name>/<int:item_id>', methods=['PUT'])
 @auth.login_required
-def update_task(name,task_id):
+def update_task(name,item_id):
 	if not is_valid(request):
 		abort(400)
 	
-	item_id = "%s:%d" % (name, task_id)
-	task = get(item_id)
-
+	task = get(name, item_id)
 	if len(task) != 0:
 		for key in task:
 			if key in request.json:
 				task[key] = request.json[key]
-		update(item_id, task)
+		update(name, item_id, task)
 		return jsonify({item_id: task})
 	else:
 		abort(404)
@@ -82,21 +79,22 @@ def delete_task(name, task_id):
 def create(name, task):
 	counter = redis_db.get("%s:counter" % name)
 	if counter:
-		id_num = int(redis_db.get("%s:counter" % name)) + 1
+		item_id = int(redis_db.get("%s:counter" % name)) + 1
 	else:
 		redis_db.set("%s:counter" % name, 0)
-		id_num = 1
-	item_id = "%s:%d" % (name, id_num)
-	redis_db.hmset(item_id, task)
+		item_id = 1
+	task_id = "%s:%d" % (name, item_id)
+	redis_db.hmset(task_id, task)
 
-	if redis_db.exists(item_id):
+	if redis_db.exists(task_id):
 		redis_db.incr("%s:counter" % name)
 		index_add(name, item_id)
 		return (True, item_id)
 	return (False, None)
 
-def get(item_id):
-	task = redis_db.hgetall(item_id)
+def get(name, item_id):
+	task_id = "%s:%d" % (name, item_id)
+	task = redis_db.hgetall(task_id)
 	if 'done' in task:
 		return parse_bool(task)
 	else:
@@ -109,17 +107,18 @@ def delete(name, item_id):
 		return True
 	return False
 
-def update(item_id, task):
-	redis_db.hmset(item_id, task)
+def update(name, item_id, task):
+	task_id = "%s:%d" % (name, item_id)
+	redis_db.hmset(task_id, task)
 
 def get_index(name):
 	return redis_db.smembers(name)
 
-def index_add(name, task_id):
-	redis_db.sadd("%s:ids" % name, task_id)
+def index_add(name, item_id):
+	redis_db.sadd("%s:ids" % name, item_id)
 
-def index_remove(name, task_id):
-	redis_db.srem("%s:ids" % name, task_id)
+def index_remove(name, item_id):
+	redis_db.srem("%s:ids" % name, item_id)
 
 def parse_bool(task):
 	if task['done'] == 'True':

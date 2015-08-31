@@ -22,7 +22,7 @@ class AppTestCase(unittest.TestCase):
     }
     redis_db.hmset("test:2", task_2)
     # set up index
-    redis_db.sadd("test:ids", "test:1", "test:2")
+    redis_db.sadd("test:ids", "1", "2")
     # set up counter
     redis_db.set("test:counter", 2)
     # set up app
@@ -30,7 +30,7 @@ class AppTestCase(unittest.TestCase):
 
   def tearDown(self):
     redis_db.delete("test:1", "test:2")
-    redis_db.srem("test:ids", "test:1", "test:2")
+    redis_db.srem("test:ids", "1", "2")
 
 class GetTest(AppTestCase):
   def test_get(self):
@@ -40,8 +40,8 @@ class GetTest(AppTestCase):
         'Authorization': 'Basic dGVzdDpwYXNz'
       })
     self.assertEqual(response.status_code, 200)
-    self.assertIn("test:1", response.data)
-    self.assertIn("test:2", response.data)
+    self.assertIn("1", response.data)
+    self.assertIn("2", response.data)
 
   def test_get_without_auth(self):
     response = self.app.get('/api/checklist/test',
@@ -60,7 +60,7 @@ class GetItemTest(AppTestCase):
         'Authorization': 'Basic dGVzdDpwYXNz'
       })
     self.assertEqual(response.status_code, 200)
-    self.assertIn("test:1", response.data)
+    self.assertIn("1", response.data)
 
   def test_get_nonexistent_item(self):
     response = self.app.get('/api/checklist/test/150',
@@ -91,7 +91,7 @@ class PutTest(AppTestCase):
       data=json.dumps(data)
     )
     self.assertEqual(response.status_code, 200)
-    self.assertIn('test:1', response.data)
+    self.assertIn('1', response.data)
     self.assertIn('true', response.data)
 
   def test_put_bad_request(self):
@@ -141,7 +141,7 @@ class PostTest(AppTestCase):
       data=json.dumps(data)
     )
     self.assertEqual(response.status_code, 201)
-    self.assertIn('test:3', response.data)
+    self.assertIn('3', response.data)
     self.assertIn('item 3', response.data)
 
   def test_post_new_items(self):
@@ -154,7 +154,7 @@ class PostTest(AppTestCase):
       data=json.dumps(data)
     )
     self.assertEqual(response.status_code, 201)
-    self.assertIn('new_list:1', response.data)
+    self.assertIn('1', response.data)
     self.assertIn('first item', response.data)
     # second item
     data = {'done': True, 'name': 'second item'}
@@ -166,7 +166,7 @@ class PostTest(AppTestCase):
       data=json.dumps(data)
     )
     self.assertEqual(response.status_code, 201)
-    self.assertIn('new_list:2', response.data)
+    self.assertIn('2', response.data)
     self.assertIn('second item', response.data)
 
   def test_post_without_auth(self):
