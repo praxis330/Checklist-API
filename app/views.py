@@ -215,8 +215,6 @@ def is_valid_profile(request):
 	for field in fields:
 		if field not in request.json:
 			raise Exception('Request does not include a "%s" field.' % field)
-		elif request.json[field] != unicode:
-			raise Exception('"%s" field is not unicode encoded.' % field.upper())
 	return True
 
 @auth.get_password

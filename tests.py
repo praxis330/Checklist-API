@@ -293,7 +293,7 @@ class PostProfileTest(ProfileTestCase):
 
   def test_partial_post(self):
     data = {
-      u'primary': u'important list',
+      'primary': 'important list',
     }
     response = self.app.post('/api/checklist/profiles/test/',
       headers={
@@ -303,7 +303,7 @@ class PostProfileTest(ProfileTestCase):
       data=json.dumps(data)
     )
     self.assertEqual(response.status_code, 400)
-    self.assertIn('Request does not include a "secondary" field.', response.data)
+    self.assertIn('Request does not include a \\"secondary\\" field.', response.data)
 
 if __name__ == "__main__":
   unittest.main()
