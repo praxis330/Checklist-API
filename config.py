@@ -1,9 +1,6 @@
 import os
 
 class Config(object):
-	USERNAME = os.environ.get('USERNAME')
-	PASSWORD = os.environ.get('PASSWORD')
-
 	DEBUG = False
 	TESTING = False
 	CSRF_ENABLED = True
@@ -13,6 +10,8 @@ class ProductionConfig(Config):
 	DEBUG = False
 
 class DevelopmentConfig(Config):
+	USERNAME = os.environ.get('USERNAME')
+	PASSWORD = os.environ.get('PASSWORD')
 	REDIS_URL = os.environ.get('REDIS_URL')
 	DEVELOPMENT = True
 	DEBUG = True

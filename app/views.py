@@ -32,7 +32,7 @@ def get_task(name, item_id):
 @app.route('/api/checklist/<name>/<int:item_id>', methods=['PUT'])
 @auth.login_required
 def update_task(name,item_id):
-	if not is_valid(request):
+	if not is_valid_task(request):
 		abort(400)
 	
 	task = get(name, item_id)
@@ -49,18 +49,15 @@ def update_task(name,item_id):
 @app.route('/api/checklist/<name>/', methods=['POST'])
 @auth.login_required
 def create_task(name):
-	if not is_valid(request) or 'name' not in request.json:
+	if not is_valid_task(request) or 'name' not in request.json:
 		abort(400)
 	task = {
 		'name': request.json['name'],
 		'done': request.json.get('done', False)
 	}
-	created, id_num = create(name, task)
-	if created:
-		index_add("tasks", id_num)
-		return jsonify({id_num: task}), 201
-	else:
-		abort(500)
+	id_num = create(name, task)
+	index_add("tasks", id_num)
+	return jsonify({id_num: task}), 201
 
 @app.route('/api/checklist/<name>/<int:item_id>', methods=['DELETE'])
 @auth.login_required
@@ -71,9 +68,31 @@ def delete_task(name, item_id):
 	else:
 		abort(404)
 
-#--------------#
-# DATABASE API #
-#--------------#
+@app.route('/api/checklist/profiles/<name>', methods=['GET'])
+@auth.login_required
+def get_profile(name):
+	profile = get_profile(name)
+	return jsonify(profile), 200
+
+@app.route('/api/checklist/profiles/<name>/', methods=['POST','PUT', 'DELETE'])
+@auth.login_required
+def update_profile(name):
+	if request.method == 'POST':
+		try:
+			if is_valid_profile(request):
+				profile_primary = request.json.get('primary', '')
+				profile_secondary = request.json.get('secondary', [])
+				profile = create_profile(name, profile_primary, profile_secondary)
+				return jsonify(profile), 200
+		except Exception as e:
+			return make_response(jsonify({'error': '%s' % e}), 400)
+	else:
+		pass
+
+
+#----------------------#
+# DATABASE API - TASKS #
+#----------------------#
 
 def create(name, task):
 	counter = redis_db.get("%s:counter" % name)
@@ -84,15 +103,12 @@ def create(name, task):
 		item_id = 1
 	task_id = "%s:%d" % (name, item_id)
 	redis_db.hmset(task_id, task)
-
-	if redis_db.exists(task_id):
-		redis_db.incr("%s:counter" % name)
-		index_add(name, item_id)
-		return (True, item_id)
-	return (False, None)
+	redis_db.incr("%s:counter" % name)
+	index_add(name, item_id)
+	return item_id
 
 def get(name, item_id):
-	task_id = "%s:%d" % (name, item_id)
+	task_id = "%s:%s" % (name, item_id)
 	task = redis_db.hgetall(task_id)
 	if 'done' in task:
 		return parse_bool(task)
@@ -111,6 +127,17 @@ def update(name, item_id, task):
 	task_id = "%s:%d" % (name, item_id)
 	redis_db.hmset(task_id, task)
 
+def parse_bool(task):
+	if task['done'] == 'True':
+		task['done'] = True
+	elif task['done'] == 'False':
+		task['done'] = False
+	return task
+
+#------------------------#
+# DATABASE API - INDEXES #
+#------------------------#
+
 def get_index(name):
 	return redis_db.smembers(name)
 
@@ -120,12 +147,32 @@ def index_add(name, item_id):
 def index_remove(name, item_id):
 	redis_db.srem("%s:ids" % name, item_id)
 
-def parse_bool(task):
-	if task['done'] == 'True':
-		task['done'] = True
-	elif task['done'] == 'False':
-		task['done'] = False
-	return task
+#-------------------------#
+# DATABASE API - PROFILES #
+#-------------------------#
+
+def create_profile(name, primary_list, secondary_lists):
+	create_primary_list(name, primary_list)
+	create_secondary_lists(name, secondary_lists)
+	return {'primary':primary_list, 'secondary':secondary_lists}
+
+def get_primary_list(name):
+	return redis_db.get("%s:profile:primary" % name)
+
+def create_primary_list(name, primary_list):
+	redis_db.set("%s:profile:primary" % name, primary_list)
+
+def get_secondary_lists(name):
+	rset = redis_db.smembers("%s:profile:secondary" % name)
+	return [item for item in rset]
+
+def create_secondary_lists(name, secondary_lists):
+	redis_db.sadd("%s:profile:secondary" % name, *secondary_lists)
+
+def get_profile(name):
+	primary = get_primary_list(name)
+	secondary = get_secondary_lists(name)
+	return {'primary': primary, 'secondary': secondary}
 
 #----------------#
 # ERROR HANDLING #
@@ -151,7 +198,7 @@ def unauthorised():
 # HELPER FUNCTIONS #
 #------------------#
 
-def is_valid(request):
+def is_valid_task(request):
 	flag = True
 	if not request.json:
 		flag = False
@@ -161,8 +208,19 @@ def is_valid(request):
 		flag = False
 	return flag
 
+def is_valid_profile(request):
+	if not request.json:
+		raise Exception('Request is not JSON formatted')
+	fields = ['primary', 'secondary']
+	for field in fields:
+		if field not in request.json:
+			raise Exception('Request does not include a "%s" field.' % field)
+		elif request.json[field] != unicode:
+			raise Exception('"%s" field is not unicode encoded.' % field.upper())
+	return True
+
 @auth.get_password
 def get_password(username):
-	if username == app.config['USERNAME']:
-		return app.config['PASSWORD']
+	if username == 'test':
+		return 'pass'
 	return None

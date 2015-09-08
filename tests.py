@@ -2,8 +2,9 @@ from app import *
 import os
 import json
 import unittest
+import sys
 
-class AppTestCase(unittest.TestCase):
+class ChecklistTestCase(unittest.TestCase):
   """
   Base class for testing app. Sets up simple fixtures in the redis server
   to be removed at the end of a test.
@@ -32,7 +33,7 @@ class AppTestCase(unittest.TestCase):
     redis_db.delete("test:1", "test:2")
     redis_db.srem("test:ids", "1", "2")
 
-class GetTest(AppTestCase):
+class GetListTest(ChecklistTestCase):
   def test_get(self):
     response = self.app.get('/api/checklist/test',
       headers={
@@ -52,7 +53,7 @@ class GetTest(AppTestCase):
     self.assertEqual(response.status_code, 403)
     self.assertIn("Not authorised", response.data)
 
-class GetItemTest(AppTestCase):
+class GetItemTest(ChecklistTestCase):
   def test_get_item(self):
     response = self.app.get('/api/checklist/test/1',
       headers={
@@ -80,7 +81,7 @@ class GetItemTest(AppTestCase):
     self.assertEqual(response.status_code, 403)
     self.assertIn("Not authorised", response.data)
 
-class PutTest(AppTestCase):
+class PutTest(ChecklistTestCase):
   def test_put_item(self):
     data = {'done': True}
     response = self.app.put('/api/checklist/test/1',
@@ -130,7 +131,7 @@ class PutTest(AppTestCase):
     self.assertEqual(response.status_code, 403)
     self.assertIn("Not authorised", response.data)
 
-class PostTest(AppTestCase):
+class PostTest(ChecklistTestCase):
   def test_post_item(self):
     data = {'done': True, 'name': 'item 3'}
     response = self.app.post('/api/checklist/test/',
@@ -201,7 +202,7 @@ class PostTest(AppTestCase):
     redis_db.set('test:counter', 2)
     redis_db.delete('new_list:counter')
 
-class DeleteTest(AppTestCase):
+class DeleteTest(ChecklistTestCase):
   def test_delete(self):
     response = self.app.delete('/api/checklist/test/2',
       headers={
@@ -231,6 +232,78 @@ class DeleteTest(AppTestCase):
     )
     self.assertEqual(response.status_code, 404)
     self.assertIn('Not found', response.data)
+
+class ProfileTestCase(unittest.TestCase):
+  def setUp(self):
+    profile_primary = 'tasks'
+    redis_db.set('test:profile:primary', 'tasks')
+    profile_secondary = [
+      'not an important list 1',
+      'not an important list 2'
+    ]
+    redis_db.sadd('test:profile:secondary', *profile_secondary)
+    self.app = app.test_client()
+
+  def tearDown(self):
+    redis_db.delete('test:profile:primary')
+    redis_db.delete('test:profile:secondary')
+
+class GetProfileTest(ProfileTestCase):
+  def test_get(self):
+    response = self.app.get('/api/checklist/profiles/test',
+      headers={
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic dGVzdDpwYXNz'
+      }
+    )
+    self.assertEqual(response.status_code, 200)
+    self.assertIn('primary', response.data)
+    self.assertIn('secondary', response.data)
+
+  def test_get_without_auth(self):
+    response = self.app.get('/api/checklist/profiles/test',
+      headers={
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic bla'
+      }
+    )
+    self.assertEqual(response.status_code, 403)
+    self.assertIn('Not authorised', response.data)
+
+class PostProfileTest(ProfileTestCase):
+  def test_post(self):
+    data = {
+      'primary': 'important list',
+      'secondary': [
+        'less important',
+        'even less important'
+      ]
+    }
+    response = self.app.post('/api/checklist/profiles/test/',
+      headers={
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic dGVzdDpwYXNz'
+      },
+      data=json.dumps(data)
+    )
+    self.assertEqual(response.status_code, 200)
+    self.assertIn('important list', response.data)
+    self.assertIn('less important', response.data)
+    self.assertIn('even less important', response.data)
+
+  def test_partial_post(self):
+    data = {
+      u'primary': u'important list',
+    }
+    response = self.app.post('/api/checklist/profiles/test/',
+      headers={
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic dGVzdDpwYXNz'
+      },
+      data=json.dumps(data)
+    )
+    self.assertEqual(response.status_code, 400)
+    self.assertIn('Request does not include a "secondary" field.', response.data)
 
 if __name__ == "__main__":
   unittest.main()
