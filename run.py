@@ -1,5 +1,5 @@
 #!flask/bin/python
-from app import app
 
-if __name__ == "__main__":
-	app.run()
+from app.factory import create_app
+app = create_app()
+app.run()
