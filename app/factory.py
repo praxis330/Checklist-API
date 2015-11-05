@@ -11,4 +11,7 @@ def create_app():
 	url = urlparse(app.config['REDIS_URL'])
 	redis_db = Redis(host=url.hostname, port=url.port, password=url.password)
 
+	from app.tasks import tasks
+	app.register_blueprint(tasks)
+
 	return app
