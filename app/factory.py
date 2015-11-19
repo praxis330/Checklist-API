@@ -6,12 +6,10 @@ def create_app():
 	import os
 	app.config.from_object(os.environ['APP_SETTINGS'])
 
-	from urlparse import urlparse
-	from redis import Redis
-	url = urlparse(app.config['REDIS_URL'])
-	redis_db = Redis(host=url.hostname, port=url.port, password=url.password)
+	from .core import redis
+	redis.init_app(app)
 
-	from app.tasks import tasks
+	from .tasks import tasks
 	app.register_blueprint(tasks)
 
 	return app

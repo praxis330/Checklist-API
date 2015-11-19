@@ -10,8 +10,8 @@ class ProductionConfig(Config):
 	DEBUG = False
 
 class DevelopmentConfig(Config):
-	USERNAME = os.environ.get('USERNAME')
-	PASSWORD = os.environ.get('PASSWORD')
+	USERNAME = 'test'
+	PASSWORD = 'pass'
 	REDIS_URL = os.environ.get('REDIS_URL')
 	DEVELOPMENT = True
 	DEBUG = True
