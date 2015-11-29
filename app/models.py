@@ -1,11 +1,11 @@
 class Validator():
-  self.model = {
-  }
+  def __init__(self):
+    self.model = {}
 
   def validate(self, task, required_fields=[]):
     for field_name, field_type in self.model.iteritems():
       try:
-        self._validate_type(task[field_name], field_type):
+        self._validate_type(task[field_name], field_type)
       except KeyError:
         self._validate_required_fields(field_name, required_fields)
 
@@ -19,10 +19,11 @@ class Validator():
 
 
 class TaskValidator(Validator):
-  self.model = {
-    'name': 'unicode',
-    'done': 'bool',
-  }
+  def __init__(self):
+    self.model = {
+      'name': 'unicode',
+      'done': 'bool',
+    }
 
 
 class TaskManager():
@@ -41,7 +42,7 @@ class TaskManager():
     id_number = self._get_id_number(list_name)
     task_id = self._parse_id(list_name, id_number)
     self.db.hmset(task_id, task_dict)
-    self.index.add(list_name, task_id)
+    self.index.add(list_name, id_number)
     return id_number
 
   def get(self, list_name, id_number):
@@ -92,7 +93,10 @@ class TaskManager():
   def _parse_updated_task(self, old_task, new_data):
     updated_task = dict()
     for key in old_task:
-      updated_task[key] = new_data[key] if new_data[key] else old_task[key]
+      try:
+        updated_task[key] = new_data[key]
+      except KeyError:
+        updated_task[key] = old_task[key]
     return updated_task
 
 
@@ -101,7 +105,7 @@ class IndexManager():
     self.db = db
 
   def get(self, list_name):
-    return self.db.smembers(list_name)
+    return self.db.smembers("%s:ids" % list_name)
 
   def add(self, list_name, id_number):
     self.db.sadd("%s:ids" % list_name, id_number)

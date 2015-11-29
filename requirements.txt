@@ -1,9 +1,11 @@
 Flask==0.10.1
 Flask-And-Redis==0.6
+Flask-Classy==0.6.10
 Flask-HTTPAuth==2.5.0
 Flask-SQLAlchemy==2.0
 Jinja2==2.8
 MarkupSafe==0.23
+SQLAlchemy==1.0.8
 Werkzeug==0.10.4
 funcsigs==0.4
 gunicorn==19.3.0
