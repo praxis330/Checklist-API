@@ -21,8 +21,8 @@ class Validator():
 class TaskValidator(Validator):
   def __init__(self):
     self.model = {
-      'name': 'unicode',
-      'done': 'bool',
+      'name': unicode,
+      'done': bool,
     }
 
 
@@ -38,10 +38,11 @@ class TaskManager():
       objects[id_number] = task
     return objects
 
-  def create(self, list_name, task_dict):
+  def create(self, list_name, request_json):
     id_number = self._get_id_number(list_name)
     task_id = self._parse_id(list_name, id_number)
-    self.db.hmset(task_id, task_dict)
+    task = self._parse_new_task(request_json)
+    self.db.hmset(task_id, task)
     self.index.add(list_name, id_number)
     return id_number
 
@@ -89,6 +90,12 @@ class TaskManager():
     counter_name = "%s:counter" % list_name
     self.db.incr(counter_name)
     return self.db.get(counter_name)
+
+  def _parse_new_task(self, new_data):
+    task = dict()
+    task['name'] = new_data['name']
+    task['done'] = new_data.get('done', False)
+    return task
 
   def _parse_updated_task(self, old_task, new_data):
     updated_task = dict()

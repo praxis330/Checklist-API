@@ -1,4 +1,4 @@
-from flask import abort, make_response, request
+from flask import abort, make_response, request, jsonify
 from flask.ext.httpauth import HTTPBasicAuth
 from flask_redis import Redis
 from functools import wraps
