@@ -23,7 +23,7 @@ class TasksView(FlaskView):
         task_validator.validate(request.json, required_fields=[])
         task_manager.exists(list_name, id_number)
 
-    @route('/<list_name>/<int:id_number>', methods=['PATCH'])
+    @route('/<list_name>/<int:id_number>', methods=['PATCH', 'PUT'])
     def patch(self, list_name, id_number):
         task_manager.update(list_name, id_number, request.json)
         updated_task = task_manager.get(list_name, id_number)
