@@ -1,3 +1,4 @@
+import os
 from flask import make_response, jsonify
 from flask.ext.httpauth import HTTPBasicAuth
 from flask_redis import Redis
@@ -22,6 +23,6 @@ def unauthorised():
 
 @auth.get_password
 def get_password(username):
-    if username == 'test':
-        return 'pass'
+    if username == os.environ.get('USERNAME'):
+        return os.environ.get('PASSWORD')
     return None
