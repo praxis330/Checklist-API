@@ -13,3 +13,4 @@ class DevelopmentConfig(Config):
 	REDIS_URL = os.environ.get('REDIS_URL')
 	DEVELOPMENT = True
 	DEBUG = True
+
