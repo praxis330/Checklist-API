@@ -1,0 +1,13 @@
+language: python
+python: 
+    - "2.7"
+services: redis-server
+env:
+    - USERNAME=test PASSWORD=pass APP_SETTINGS=config.DevelopmentConfig
+install: pip install -r requirements.txt
+script: python tests.py
+deploy:
+    provider: heroku
+    api_key:
+        secure: RtJw2DaPNcY9Uxe0R7Cs9HuCIKpRaDRao10arOILcduPwNBn+AC4NUrFnNRemL/hgwVKMMVO0L30el3Thz07acnqEGVCqiRJa85EYDgd/Kp+FGzT3oD7mZYQH1dI4iPcQEN0Uv5OcCud9mx7vh+Eqn8+C5S7RxePQPDC1YWo90TKS6Qwdc+1fo2D/0ca1AMO6G5tJgM4axH/DVzDJzUwz5rpwGKmZPEAl/TrcsS4i2SbpvXDUpm6mLwaV6Iv4WvqqWmQDlTSml0uSL6MfFyiJ85mpwxCISKXyhdtmDbsk4/ecqFUD2afU43RujEe9utcwC8gUd7eA2f5sfbNa+7HLcwMEXUAA6QI0pc4lCzAD/75dLgHtNqMdxJEMXDy47nVE0ZKvF4z6WTwjLwG+KDvKwVuzhyAk6qB/SYTzdXj6KIHcnD1ZvyKlVcG0CZu473blT/4yze0fmKdMNPW5dxv1+EGZvvafxVdt6GfnnXhcBZMPG5YbdR445MIzJGcOfmDmn6H86XxSMzHSaANXusJwar/EayBJOgM6BLnj3BoPAyWoZMMxQwDK4FlglV3Peouxzpd0ZjxezM98/upwbj6VzZbK6iy5ii13ryTSkknI4+I+NXqKys0H+ReSrHEagPVqi+7U2x83K9k5b8N8fhI4xn1cxdNTLEehLp2oIGWgwU=
+    app: checklist-stage
