@@ -101,14 +101,14 @@ class TaskManager():
         task['done'] = new_data.get('done', False)
         return task
 
-        def _parse_updated_task(self, old_task, new_data):
-            updated_task = dict()
-            for key in old_task:
-                try:
-                    updated_task[key] = new_data[key]
-                except KeyError:
-                    updated_task[key] = old_task[key]
-                return updated_task
+    def _parse_updated_task(self, old_task, new_data):
+        updated_task = dict()
+        for key in old_task:
+            try:
+                updated_task[key] = new_data[key]
+            except KeyError:
+                updated_task[key] = old_task[key]
+            return updated_task
 
 
 class IndexManager():
