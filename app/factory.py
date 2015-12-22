@@ -13,6 +13,9 @@ def create_app():
     from .tasks import TasksView
     TasksView.register(app)
 
+    from .profiles import ProfilesView
+    ProfilesView.register(app)
+
     from .handlers import not_found, bad_request, internal_error
     from .exceptions import DoesNotExist, ValidationError
     app.register_error_handler(DoesNotExist, not_found)

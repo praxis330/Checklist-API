@@ -119,6 +119,9 @@ class ProfileManager():
         profile_list = request_json.get('lists')
         self.db.lpush("profile:%s" % profile_name, *profile_list)
 
+    def get(self, profile_name):
+        return self.db.lrange("profile:%s" % profile_name, 0, -1)
+
 
 class IndexManager():
     def __init__(self, db):
