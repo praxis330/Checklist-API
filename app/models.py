@@ -111,6 +111,15 @@ class TaskManager():
             return updated_task
 
 
+class ProfileManager():
+    def __init__(self, db):
+        self.db = db
+
+    def create(self, profile_name, request_json):
+        profile_list = request_json.get('lists')
+        self.db.lpush("profile:%s" % profile_name, *profile_list)
+
+
 class IndexManager():
     def __init__(self, db):
         self.db = db

@@ -2,7 +2,7 @@ import os
 from flask import make_response, jsonify
 from flask.ext.httpauth import HTTPBasicAuth
 from flask_redis import Redis
-from .models import TaskManager, IndexManager, TaskValidator
+from .models import TaskManager, IndexManager, ProfileManager, TaskValidator
 
 
 redis = Redis()
@@ -10,6 +10,8 @@ redis = Redis()
 index_manager = IndexManager(db=redis)
 
 task_manager = TaskManager(db=redis, index=index_manager)
+
+profile_manager = ProfileManager(db=redis)
 
 task_validator = TaskValidator()
 

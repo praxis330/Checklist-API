@@ -5,7 +5,10 @@ services: redis-server
 env:
     - USERNAME=test PASSWORD=pass APP_SETTINGS=config.DevelopmentConfig
 install: pip install -r requirements.txt
-script: python e2e-tests.py
+script: |
+    for file in app/tests/*.py; do
+        python $file
+    done
 deploy:
     provider: heroku
     api_key:

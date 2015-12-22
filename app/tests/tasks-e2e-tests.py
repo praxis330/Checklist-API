@@ -212,7 +212,6 @@ class PostTest(ChecklistTestCase):
 class DeleteTest(ChecklistTestCase):
     def setUp(self):
         super(DeleteTest, self).setUp()
-        self.test_2
 
     def test_delete(self):
         response = self.app.delete('/api/checklist/test/%s' % self.test_2,
