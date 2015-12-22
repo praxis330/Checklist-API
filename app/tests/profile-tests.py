@@ -1,6 +1,6 @@
 import unittest
 from redis import Redis
-from ..models import ProfileManager
+from app.models import ProfileManager
 
 
 class ProfileManagerTestCase(unittest.TestCase):

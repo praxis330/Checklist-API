@@ -1,5 +1,5 @@
 import unittest
-from app.factory import create_app
+from ..factory import create_app
 
 
 class ProfileTestCase(unittest.TestCase):
@@ -13,4 +13,4 @@ class PostTest(ProfileTestCase):
         response = self.app.get('/api/profile/test/')
 
 if __name__ == '__main__':
-	unittest.main()
+    unittest.main()

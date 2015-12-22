@@ -6,9 +6,9 @@ env:
     - USERNAME=test PASSWORD=pass APP_SETTINGS=config.DevelopmentConfig
 install: pip install -r requirements.txt
 script: |
-    for file in app/tests/*.py; do
-        python $file
-    done
+    python -m app.tests.profile-e2e-tests
+    python -m app.tests.profile-tests
+    python -m app.tests.tasks-e2e-tests
 deploy:
     provider: heroku
     api_key:
