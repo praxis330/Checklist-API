@@ -10,10 +10,10 @@ def create_app():
     from .core import redis
     redis.init_app(app)
 
-    from .tasks import TasksView
+    from tasks.views import TasksView
     TasksView.register(app)
 
-    from .profiles import ProfilesView
+    from profiles.views import ProfilesView
     ProfilesView.register(app)
 
     from .handlers import not_found, bad_request, internal_error

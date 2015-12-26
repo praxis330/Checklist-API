@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from flask.ext.classy import FlaskView, route
-from .core import task_manager, task_validator, auth
+from ..core import task_manager, task_validator, auth
 
 
 class TasksView(FlaskView):
