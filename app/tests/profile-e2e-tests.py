@@ -88,6 +88,81 @@ class PostTest(ProfileTestCase):
     def tearDown(self):
         self.profile_manager.delete('test')
 
+class PatchTest(ProfileTestCase):
+    def setUp(self):
+        super(PatchTest, self).setUp()
+        self.profile_manager.create('test', {'lists': ['checklist', 'test']})
+
+    def test_patch(self):
+        data = {'lists': ['test', 'another_list']}
+        response = self.app.put('api/profile/%s/' % 'test',
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic dGVzdDpwYXNz'
+            },
+            data=json.dumps(data)
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('another_list', response.data)
+
+    def test_without_auth(self):
+        data = {'lists': ['test', 'another_list']}
+        response = self.app.put('api/profile/%s/' % 'test',
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic blabla'
+            },
+            data=json.dumps(data)
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertIn('Not authorised', response.data)
+
+    def test_post_invalid_request(self):
+        data = {'listo': ['test', 'another_list']}
+        response = self.app.put('api/profile/%s/' % 'test',
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic dGVzdDpwYXNz'
+            },
+            data=json.dumps(data)
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('lists field is required', response.data)
+
+class DeleteTest(ProfileTestCase):
+    def setUp(self):
+        super(DeleteTest, self).setUp()
+        self.profile_manager.create('test', {'lists': ['checklist', 'test']})
+
+    def test_delete(self):
+        response = self.app.delete('api/profile/%s' % 'test',
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic dGVzdDpwYXNz'
+            }
+        )
+        self.assertEqual(response.status_code, 204)
+
+    def test_delete_without_auth(self):
+        response = self.app.delete('api/profile/%s' % 'test',
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic blabla'
+            }
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertIn('Not authorised', response.data)
+
+    def test_delete_non_existent_profile(self):
+        response = self.app.delete('api/profile/%s' % 'absent',
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic dGVzdDpwYXNz'
+            }
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('does not exist', response.data)
+
 
 if __name__ == '__main__':
     unittest.main()

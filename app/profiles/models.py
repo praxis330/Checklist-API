@@ -21,5 +21,9 @@ class ProfileManager():
             return True
         return False
 
+    def update(self, profile_name, request_json):
+        self.delete(profile_name)
+        self.create(profile_name, request_json)
+
     def _parse_id(self, profile_name):
         return "profile:%s" % profile_name
