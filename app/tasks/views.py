@@ -45,7 +45,7 @@ class TasksView(FlaskView):
     def before_post(self, list_name):
         task_validator.validate(request.json, required_fields=['name'])
 
-    @route('/<list_name>/', methods=['POST'])
+    @route('/<list_name>', methods=['POST'])
     def post(self, list_name):
         id_number = int(task_manager.create(list_name, request.json))
         task = task_manager.get(list_name, id_number)
