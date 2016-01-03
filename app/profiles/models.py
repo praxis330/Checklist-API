@@ -5,7 +5,7 @@ class ProfileManager():
     def create(self, profile_name, request_json):
         profile_list = request_json.get('lists')
         profile = self._parse_id(profile_name)
-        self.db.lpush(profile, *profile_list)
+        self.db.lpush(profile, *reversed(profile_list))
 
     def get(self, profile_name):
         profile = self._parse_id(profile_name)

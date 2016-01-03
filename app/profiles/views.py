@@ -24,7 +24,7 @@ class ProfilesView(FlaskView):
     def before_post(self, profile_name):
         profile_validator.validate(request.json, required_fields=['lists'])
 
-    @route('/<profile_name>/', methods=['POST'])
+    @route('/<profile_name>', methods=['POST'])
     def post(self, profile_name):
         profile_manager.create(profile_name, request.json)
         lists = profile_manager.get(profile_name)
@@ -35,7 +35,7 @@ class ProfilesView(FlaskView):
         if not profile_manager.exists(profile_name):
             raise DoesNotExist("Profile '%s' does not exist." % profile_name)
 
-    @route('/<profile_name>/', methods=['PATCH', 'PUT'])
+    @route('/<profile_name>', methods=['PATCH', 'PUT'])
     def patch(self, profile_name):
         profile_manager.update(profile_name, request.json)
         lists = profile_manager.get(profile_name)

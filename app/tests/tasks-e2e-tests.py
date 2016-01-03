@@ -142,7 +142,7 @@ class PostTest(ChecklistTestCase):
 
     def test_post_item(self):
         data = {'done': True, 'name': 'item 3'}
-        response = self.app.post('/api/checklist/test/',
+        response = self.app.post('/api/checklist/test',
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': 'Basic dGVzdDpwYXNz'
@@ -156,7 +156,7 @@ class PostTest(ChecklistTestCase):
 
     def test_post_new_items(self):
         data = {'done': True, 'name': 'first item'}
-        response = self.app.post('/api/checklist/new_list/',
+        response = self.app.post('/api/checklist/new_list',
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': 'Basic dGVzdDpwYXNz'
@@ -168,7 +168,7 @@ class PostTest(ChecklistTestCase):
         self.assertIn('first item', response.data)
         # second item
         data = {'done': True, 'name': 'second item'}
-        response = self.app.post('/api/checklist/new_list/',
+        response = self.app.post('/api/checklist/new_list',
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': 'Basic dGVzdDpwYXNz'
@@ -181,7 +181,7 @@ class PostTest(ChecklistTestCase):
 
     def test_post_without_auth(self):
         data = {'done': True, 'name': 'item 3'}
-        response = self.app.post('/api/checklist/test/',
+        response = self.app.post('/api/checklist/test',
         headers={
             'Content-Type': 'application/json',
             'Authorization': 'Basic bla'
@@ -193,7 +193,7 @@ class PostTest(ChecklistTestCase):
 
     def test_post_bad_request(self):
         data = {'done': True}
-        response = self.app.post('/api/checklist/test/',
+        response = self.app.post('/api/checklist/test',
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': 'Basic dGVzdDpwYXNz'
