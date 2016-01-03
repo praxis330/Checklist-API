@@ -51,7 +51,7 @@ class GetItemTest(ProfileTestCase):
 class PostTest(ProfileTestCase):
     def test_post(self):
         data = {'lists': ['test', 'checklist']}
-        response = self.app.post('/api/profile/%s/' % 'test',
+        response = self.app.post('/api/profile/%s' % 'test',
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': 'Basic dGVzdDpwYXNz'
@@ -63,7 +63,7 @@ class PostTest(ProfileTestCase):
 
     def test_post_without_auth(self):
         data = {'lists': ['test', 'checklist']}
-        response = self.app.post('/api/profile/%s/' % 'test',
+        response = self.app.post('/api/profile/%s' % 'test',
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': 'Basic blabla'
@@ -75,7 +75,7 @@ class PostTest(ProfileTestCase):
 
     def test_post_invalid_request(self):
         data = {'listo': 'not a list'}
-        response = self.app.post('api/profile/%s/' % 'test',
+        response = self.app.post('api/profile/%s' % 'test',
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': 'Basic dGVzdDpwYXNz'
@@ -95,7 +95,7 @@ class PatchTest(ProfileTestCase):
 
     def test_patch(self):
         data = {'lists': ['test', 'another_list']}
-        response = self.app.put('api/profile/%s/' % 'test',
+        response = self.app.put('api/profile/%s' % 'test',
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': 'Basic dGVzdDpwYXNz'
@@ -107,7 +107,7 @@ class PatchTest(ProfileTestCase):
 
     def test_without_auth(self):
         data = {'lists': ['test', 'another_list']}
-        response = self.app.put('api/profile/%s/' % 'test',
+        response = self.app.put('api/profile/%s' % 'test',
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': 'Basic blabla'
@@ -119,7 +119,7 @@ class PatchTest(ProfileTestCase):
 
     def test_post_invalid_request(self):
         data = {'listo': ['test', 'another_list']}
-        response = self.app.put('api/profile/%s/' % 'test',
+        response = self.app.put('api/profile/%s' % 'test',
             headers={
                 'Content-Type': 'application/json',
                 'Authorization': 'Basic dGVzdDpwYXNz'
