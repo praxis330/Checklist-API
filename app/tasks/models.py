@@ -73,9 +73,6 @@ class TaskManager():
 
     def _parse_updated_task(self, old_task, new_data):
         updated_task = dict()
-        for key in old_task:
-            try:
-                updated_task[key] = new_data[key]
-            except KeyError:
-                updated_task[key] = old_task[key]
-            return updated_task
+        updated_task['name'] = new_data.get('name', old_task['name'])
+        updated_task['done'] = new_data.get('done', old_task['done'])
+        return updated_task
